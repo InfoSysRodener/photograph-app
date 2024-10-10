@@ -2,8 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Models\Album;
+use App\Models\Capture;
+use App\Models\Photobooth;
 use App\Models\User;
+use App\Models\Venue;
+use App\Models\Remote;
+
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use DB;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +20,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        
+        //Create Venue
+        Venue::factory(5)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        //Remote
+        Remote::factory(10)->create();
+
+        //User
+        User::factory(10)->create();
+
+        //create albums
+        Album::factory(10)->create();
+
+        //Capture
+        Capture::factory(10)->create();
+
+        Photobooth::factory(10)->create();
+
     }
 }
