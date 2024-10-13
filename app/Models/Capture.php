@@ -9,4 +9,9 @@ class Capture extends Model
 {
     /** @use HasFactory<\Database\Factories\CaptureFactory> */
     use HasFactory;
+
+    public function album(){
+        return $this->belongsTo(Album::class);
+    }
+
 }

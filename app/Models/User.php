@@ -45,4 +45,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function album() {
+        return $this->hasOne(Album::class);
+    }
 }

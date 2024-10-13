@@ -18,7 +18,7 @@ class CaptureFactory extends Factory
     public function definition(): array
     {
         return [
-            'image_path' => 'https://picsum.photos/400/500',
+            'image_path' => 'https://uicookies.com/demo/theme/aside/images/img_' . fake()->numberBetween(1,20) . '.jpg' ,
             'album_id' => Album::all()->random()->id,
         ];
     }
