@@ -25,7 +25,7 @@ class AlbumFactory extends Factory
             'date_add' => now(),
             'date_over' => null,
             'date_update' => null,
-            'remote_id' => Remote::all()->random()->id,
+            'remote_id' => Remote::all()->unique()->random()->id,
             'venue_id' =>  Venue::all()->random()->id,
         ];
     }

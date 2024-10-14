@@ -19,7 +19,8 @@ class AlbumResource extends JsonResource
             'status' => $this->status,
             'remote_id' => $this->remote_id,
             'venue_id' => $this->venue_id,
-            'captures' => $this->capture
+            'captures' => $this->capture,
+            'remotes' => $this->remote
         ];
     }
 }

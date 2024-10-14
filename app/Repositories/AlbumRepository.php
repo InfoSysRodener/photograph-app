@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Respositories;
+namespace App\Repositories;
 use App\Interfaces\AlbumRepositoryInterface;
 use App\Models\Album;
 
@@ -12,7 +12,7 @@ class AlbumRepository implements AlbumRepositoryInterface
     }
 
     public function getById($id) {
-        return Album::with('capture')->find($id);
+        return Album::with(['capture','remote'])->find($id);
     }
 
     public function store(array $data){
