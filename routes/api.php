@@ -40,7 +40,7 @@ Route::post('/generateQRCodeUrl',function(){
         'qrcode_image' => 'https://photographer.s3.ap-southeast-1.amazonaws.com/qrcode/'. $qrcode_name
     ]);
     
-    $url = 'https://photograph-front-end.vercel.app/photographer/remote/' . $remote->id . '/' . hash('sha256','SALT123+'. $remote->id);
+    $url = 'http://localhost:5173/photographer/remote/' . $remote->id . '/' . hash('sha256','SALT123+'. $remote->id);
  
     QRCode::url($url)
     ->setSize(8)
