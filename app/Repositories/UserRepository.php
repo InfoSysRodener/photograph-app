@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Respositories;
+namespace App\Repositories;
 use App\Interfaces\UserRepositoryInterface;
 use App\Models\User;
 
@@ -20,7 +20,9 @@ class UserRepository implements UserRepositoryInterface
      }
  
      public function update(array $data,$id){
+      
         return User::whereId($id)->update($data);
+        
      }
      
      public function delete($id){

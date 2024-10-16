@@ -9,7 +9,7 @@ class Album extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['remote_id','status','date_add','venue_id'];
+    protected $fillable = ['remote_id','status','date_add','venue_id','qrcode_image'];
 
     public function user(){
         return $this->belongsTo(User::class);

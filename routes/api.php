@@ -8,6 +8,7 @@ use App\Models\Remote;
 use App\Models\Venue;
 use App\Models\User;
 use App\Models\Album;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cookie;
@@ -25,9 +26,77 @@ Route::apiResource('album',AlbumController::class);
 Route::apiResource('capture',CaptureController::class)->only(['index','show']);
 
 
+Route::get('/notifyAllAlbumUsers', function(Request $request) {
+
+    $album_id = $request->get('album_id');
+    $users = User::where('album_id',$album_id)->get();
+
+    foreach($users as $user){
+        Mail::to($user->email)->queue( new App\Mail\Album($user));
+    }  
+
+    return ApiResponseClass::sendResponse('','Successfully Send',200);
+});
+
+
+Route::post('/generateQRCodeUserToAlbum', function(Request $request){
+    //invite friend qrcode (new user & same album_id) when scan
+    //add new column on album
+    //check if album has qr code 
+    // generate qr_code
+    // update album qrcode_image
+    //just add-user-associated-with-album 
+    //redirect on album page     
+    //format https://domain.com/photographer/album/album_id/user/user_id/token
+
+    $album_id = $request->get('album_id');
+
+    $album = Album::findOrFail($album_id);
+    
+    if (empty($album->qrcode_image)) {
+     
+        $user = User::create([
+            'album_id' => $album_id,
+            'name' => 'scanned_friend_invite',
+            'email' => 'scanned_email' . Str::random(5) . '@gmail.com' ,
+            'password' => 'scanned_password' . Str::random(3)
+        ]);
+    
+        $filename = '/qr-code';
+        $extention = '.png';
+        $path = storage_path(). $filename . $extention;
+        $qrcode_name =  Str::random(5) . $extention; 
+
+        $qrcode_image ='https://photographer.s3.ap-southeast-1.amazonaws.com/qrcode/'. $qrcode_name; 
+
+        //update album 
+        Album::where('id' ,$album_id)->update(['qrcode_image' => $qrcode_image]);
+
+        $token = hash('sha256', 'SALT123+' . $user->id . '+' . $album_id);
+    
+        $url = 'http://localhost:5173/photographer/album/' . $album_id . '/' . 'user' . '/' . $user->id .'/' . $token . '';
+     
+        QRCode::url($url)
+        ->setSize(8)
+        ->setMargin(2)
+        ->setOutfile($path)
+        ->png();
+    
+        $qrImage =  file_get_contents($path);
+    
+        Storage::disk('s3')->put('qrcode/' . $qrcode_name, $qrImage,['ACL' => 'public-read']);
+
+        return ApiResponseClass::sendResponse(['url' => $url , 'image'=> $qrcode_image],'Successfully Generate Friend QRCode',200);
+    }
+
+    return ApiResponseClass::sendResponse(['url' => '' , 'image'=> $album->qrcode_image],'Already have QRCode',200);
+   
+});
+
 Route::post('/generateQRCodeUrl',function(){
     //create a remote_id
     //format https://domain.com/photographer/remote/remote_id/ token + 16chars HASH of the string "SALT123+device_id"
+
     $filename = '/qr-code';
     $extention = '.png';
     $path = storage_path(). $filename . $extention;
@@ -55,6 +124,9 @@ Route::post('/generateQRCodeUrl',function(){
 
     return ApiResponseClass::sendResponse(['remote' => $remote, 'url' => $url],'Successfully Generate QRCode',200);
 });
+
+
+
 
 Route::post('/scan',function(Request $request){
    //get the remote - device_id
@@ -95,15 +167,14 @@ Route::post('/scan',function(Request $request){
     ]);
     
     $token = hash('sha256', 'SALT123+' . $user->id . '+' . $newAlbum->id);
-    Cookie::queue('user_token', $token, 120);
-
+    
     DB::commit();
 
-    return ApiResponseClass::sendResponse(['user' => $user, 'new_album' => $newAlbum , 'url' => [
+    return ApiResponseClass::sendResponseWithCookie(['user' => $user, 'new_album' => $newAlbum , 'url' => [
         'user_id' => $user->id,
         'album_id' => $newAlbum->id,
         'token' => $token
-    ]] ,'Successfully Create User' , 200);
+    ]] ,'Successfully Create User' , 200 , $token);
 
    }
    catch (Exception $e){

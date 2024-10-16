@@ -15,7 +15,5 @@ class Remote extends Model
         'qrcode_image'
     ];
 
-    public function album() {
-        return $this->has(Album::class);
-    }
+
 }

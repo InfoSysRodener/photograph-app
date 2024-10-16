@@ -23,7 +23,6 @@ class CaptureController extends Controller
     public function index(Request $request)
     {  
         $album_id = $request->query('album_id');
-        //check the user or hash
 
         $data = $album_id ? $this->capture->getByAlbumId($album_id) : $this->capture->index();
         
