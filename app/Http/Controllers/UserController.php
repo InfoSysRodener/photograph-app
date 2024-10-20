@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use DB;
+use Str;
 
 class UserController extends Controller
 {
@@ -36,35 +37,61 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         
+        try {
+
+            $details = [
+                'email' => $request->email,
+                'album_id' => $request->album_id,
+                'name' => 'name_' . Str::random(5) 
+            ];
+
+            $data = $this->user->store($details);
+
+            DB::commit();
+                
+            return ApiResponseClass::sendResponse($data, 'Successfully Created',200);
+
+        }catch(\Exception $e){
+            return ApiResponseClass::rollback($e);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show($id)
     {
         //
+        $data = $this->user->getById($id);
+        return ApiResponseClass::sendResponse(new UserResource($data), '',200);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+      
         DB::beginTransaction();
         try{
             $details =[
                 'email' => $request->email,
                 'email_verified_at' => now()
             ];
-    
+
+            $user = $this->user->getById($id);
+
             if($user->email_verified_at === null){
                 //send mail
                 Mail::to($request->email)->send(new Album($user));
             }
             
-            $this->user->update($details,$user->id);
+            $this->user->update($details,$id);
+
+            DB::commit();
+           
     
             return ApiResponseClass::sendResponse('', 'Successfully Updated',200);
         }catch(\Exception $e){
@@ -73,11 +100,6 @@ class UserController extends Controller
        
     }
 
-    public function notifyAllAlbumUsers(User $user){
-
-      $users = User::where('album_id',2)->get();
-      dd($users);
-    }
 
     /**
      * Remove the specified resource from storage.

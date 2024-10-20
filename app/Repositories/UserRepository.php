@@ -12,7 +12,7 @@ class UserRepository implements UserRepositoryInterface
     }
 
     public function getById($id) {
-        return User::with('album')->findOrFail($id);
+        return User::findOrFail($id);
     }
 
     public function store(array $data){

@@ -7,6 +7,7 @@ use App\Interfaces\AlbumRepositoryInterface;
 use App\Models\Album;
 use Illuminate\Http\Request;
 use App\Classes\ApiResponseClass;
+use DB;
 
 class AlbumController extends Controller
 {
@@ -48,9 +49,26 @@ class AlbumController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Album $album)
+    public function update(Request $request, $id)
     {
         //
+
+        DB::beginTransaction();
+        try{
+            $details =[
+                'status' => $request->get('album_status'),
+                'date_update' => now()
+            ];
+
+            $this->album->update($details,$id);
+
+            DB::commit();
+           
+    
+            return ApiResponseClass::sendResponse('', 'Successfully Updated',200);
+        }catch(\Exception $e){
+            return ApiResponseClass::rollback($e);
+        }
     }
 
     /**
